@@ -157,7 +157,14 @@ CBUFFER_START(UnityShadows)
     float4 _LightSplitsNear;
     float4 _LightSplitsFar;
     float4x4 unity_WorldToShadow[4];
+    // _LightShadowData待确认
+    // _LightShadowData.x - shadow strength
+    // _LightShadowData.y - Appears to be unused
+    // _LightShadowData.z - 1.0 / shadow far distance
+    // _LightShadowData.w - shadow near distance
     half4 _LightShadowData;
+    // xyz - camPos +  normalize( camFront ) * (1 / 3.75f) * shadowDistance
+    // w - 1 or 0
     float4 unity_ShadowFadeCenterAndType;
 CBUFFER_END
 
@@ -311,8 +318,11 @@ CBUFFER_END
         // z = Texel size on U texture coordinate
         float4 unity_ProbeVolumeParams;
 
+        // 世界空间到光探针代理体局部空间矩阵
         float4x4 unity_ProbeVolumeWorldToObject;
+        // 光探针代理体长宽高的倒数
         float3 unity_ProbeVolumeSizeInv;
+        // 光探针代理体左下角的x、y、z坐标
         float3 unity_ProbeVolumeMin;
     CBUFFER_END
 #endif

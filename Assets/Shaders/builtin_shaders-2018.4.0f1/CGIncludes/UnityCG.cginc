@@ -796,6 +796,7 @@ v2f_img vert_img( appdata_img v )
 // Projected screen position helpers
 #define V2F_SCREEN_TYPE float4
 
+// 返回 ((pos.x + pos.w) / 2, (-pos.y + pos.w) / 2, pos.z, pos.w)
 inline float4 ComputeNonStereoScreenPos(float4 pos) {
     float4 o = pos * 0.5f;
     o.xy = float2(o.x, o.y*_ProjectionParams.x) + o.w;
@@ -836,7 +837,7 @@ inline float4 UnityPixelSnap (float4 pos)
     float2 pixelPos = float2(__v_floor_f32(temp.x), __v_floor_f32(temp.y));
 #else
     float2 pixelPos = round ((pos.xy / pos.w) * hpc);
-#endif
+#endif 
     pos.xy = pixelPos / hpc * pos.w;
     return pos;
 }

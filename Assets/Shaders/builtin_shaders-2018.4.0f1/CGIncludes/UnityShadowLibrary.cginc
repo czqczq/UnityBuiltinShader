@@ -337,6 +337,7 @@ half UnityComputeShadowFade(float fadeDist)
 *   http://mynameismjp.wordpress.com/2013/09/10/shadow-maps/
 *   http://amd-dev.wpengine.netdna-cdn.com/wordpress/media/2012/10/Isidoro-ShadowMapping.pdf
 */
+// 基于斜度比率深度偏差 (bias = factorSlope * slope + constantBias)
 float3 UnityGetReceiverPlaneDepthBias(float3 shadowCoord, float biasMultiply)
 {
     // Should receiver plane bias be used? This estimates receiver slope using derivatives,
@@ -349,8 +350,13 @@ float3 UnityGetReceiverPlaneDepthBias(float3 shadowCoord, float biasMultiply)
     float3 dx = ddx(shadowCoord);
     float3 dy = ddy(shadowCoord);
 
+    // Jacobian矩阵
+    //Invert texture Jacobian and use chain rule to compute dd/du and dd/dv
+    // |dd/du| = |du/dx du/dy|-T * |dd/dx|
+    // |dd/dv| = |dv/dx dv/dy|   * |dd/dy|
     biasUVZ.x = dy.y * dx.z - dx.y * dy.z;
     biasUVZ.y = dx.x * dy.z - dy.x * dx.z;
+    //计算矩阵行列式：Multiply dd/dx and dd/dy by inverse transpose of Jacobian
     biasUVZ.xy *= biasMultiply / ((dx.x * dy.y) - (dx.y * dy.x));
 
     // Static depth biasing to make up for incorrect fractional sampling on the shadow map grid.
@@ -369,6 +375,7 @@ float3 UnityGetReceiverPlaneDepthBias(float3 shadowCoord, float biasMultiply)
 * Combines the different components of a shadow coordinate and returns the final coordinate.
 * See UnityGetReceiverPlaneDepthBias
 */
+// 返回(baseUV.x + deltaUV.x, baseUV.y + deltaUV.y, depth + receiverPlaneDepthBias.z + dot(deltaUV, receiverPlaneDepthBias.xy))
 float3 UnityCombineShadowcoordComponents(float2 baseUV, float2 deltaUV, float depth, float3 receiverPlaneDepthBias)
 {
     float3 uv = float3(baseUV + deltaUV, depth + receiverPlaneDepthBias.z);
